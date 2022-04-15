@@ -67,6 +67,8 @@ public:
 
     }
 
+    // funcEnter returns 1 if no further search required and vertex is to be closed immediately,
+    // returns 0 if further search is required
     template <typename FuncEnter, typename FuncExit>
     void dfs (size_t s, FuncEnter &funcEnter, FuncExit &funcExit) const
     {
@@ -91,7 +93,8 @@ public:
             stk.pop ();
             stk.push (u);
 
-            funcEnter (u);
+            if (funcEnter (u))
+                continue;
             
             for (auto v: neibs[u])
             {
@@ -170,9 +173,10 @@ void dfsDemo ()
     {
         size_t *time;
 
-        void operator () (int vertex)
+        bool operator () (int vertex)
         {
             printf ("%d entry at t=%lu\n", vertex, (*time)++);
+            return false;
         }
     };
 
