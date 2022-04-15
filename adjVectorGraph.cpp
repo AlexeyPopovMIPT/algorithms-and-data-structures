@@ -1,11 +1,10 @@
 /*
- * Граф, представленный вектором смежности, с реализованными алгоритмами DFS, BFS
+ * Граф, представленный вектором смежности, с реализованными алгоритмами DFS, BFS, topo sort
  */
 #include <vector>
 #include <queue>
 #include <set>
 #include <stack>
-#include <functional>
 #include <cstdio>
 
 class AdjVectorGraph
@@ -116,7 +115,7 @@ void dfs (const AdjVectorGraph &g, size_t s, FuncEnter &funcEnter, FuncExit &fun
         if (funcEnter (u))
             continue;
             
-        for (auto v: getNeibs[u])
+        for (auto v: g.getNeibs(u))
         {
             if (state[v] == UNVISITED)
             {
