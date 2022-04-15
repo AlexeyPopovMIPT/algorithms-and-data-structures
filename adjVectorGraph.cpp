@@ -117,6 +117,62 @@ public:
 
 
 
+// topo sort of DAG g (if not acyclic, GIGO)
+std::vector <size_t> topoSort (const AdjVectorGraph &g)
+{
+    struct OnEntry
+    {
+        enum Color { BLACK, WHITE };
+        std::vector <Color> color;
+
+        OnEntry (size_t n):
+            color (n, WHITE)
+        {}
+
+        bool operator () (size_t u)
+        {
+            printf ("%lu entered\n", u);
+            if (color [u] == BLACK) return true;
+            color [u] = WHITE;
+            return false;
+        }
+
+    };
+
+    struct OnExit
+    {
+        enum Color { BLACK, WHITE };
+        std::vector <size_t> answer;
+        size_t time;
+
+        OnExit (size_t n):
+            answer (n, (size_t)-1),
+            time (0)
+        {}
+
+        bool operator () (size_t u)
+        {
+            if (answer [u] != (size_t)-1) return true;
+            answer [u] = time++;
+            return false;
+        }
+    };
+
+    size_t n = g.size ();
+    OnEntry onEntry (n);
+    OnExit onExit (n);
+
+    for (size_t vertex = 0; vertex < n; ++vertex)
+    {
+        if (onExit.answer [vertex] == (size_t)-1)
+            g.dfs (vertex, onEntry, onExit);
+    }
+
+    return onExit.answer;
+}
+
+
+
 void bfsDemo ()
 {
     struct Say
@@ -206,7 +262,26 @@ void dfsDemo ()
     g.dfs (0, enterTime, exitTime);
 }
 
+void topoSortDemo ()
+{
+    AdjVectorGraph g (5);
+    g.insertEdge (0, 1);
+    g.insertEdge (1, 2);
+    g.insertEdge (2, 3);
+    g.insertEdge (3, 4);
+    g.insertEdge (0, 2);
+    g.insertEdge (0, 3);
+    g.insertEdge (2, 4);
+
+    std::vector <size_t> sorted = topoSort (g);
+
+    for (auto ord: sorted)
+        printf ("%lu\n", ord);
+
+}
+
 int main ()
 {
+    topoSortDemo ();
 }
 
