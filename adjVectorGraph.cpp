@@ -25,7 +25,6 @@ public:
             return false;
 
         neibs[u].insert (v);
-        neibs[v].insert (u);
         return true;
     }
 
@@ -35,7 +34,6 @@ public:
             return false;
 
         neibs[u].erase (v);
-        neibs[v].erase (u);
         return true;
     }
 
