@@ -115,9 +115,56 @@ public:
 
 };
 
+void bfsDemo ()
+{
+    struct Say
+    {
+        void operator () (int vertex, int parent)
+        {
+            printf ("vertex %d, parent %d\n", vertex, parent);
+        }
+    };
 
+    struct GetMinDistance
+    {
+        std::vector <int> distances;
 
-// topo sort of DAG g (if not acyclic, GIGO)
+        GetMinDistance (size_t n, size_t vertexFrom):
+            distances (n, -1)
+        {
+            distances[vertexFrom] = 0;
+        }
+
+        void operator () (int vertex, int parent)
+        {
+            distances [vertex] = distances [parent] + 1;
+        }
+    };
+
+    AdjVectorGraph g (8);
+    g.insertEdge (0, 1);
+    g.insertEdge (0, 2);
+    g.insertEdge (1, 3);
+    g.insertEdge (1, 4);
+    g.insertEdge (2, 5);
+    g.insertEdge (2, 6);
+
+    printf ("Vertexes in order they are visited from v = 0:\n");
+    Say say;
+    g.bfs <Say> (0, say);
+
+    printf ("Minimal distances from v = 0:\n");
+    GetMinDistance counter (8, 0);
+    g.bfs <GetMinDistance> (0, counter);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        printf ("%d: %d\n", i, counter.distances[i]);
+    }
+
+}
+
+// topo sort of DAG g (if not acyclic, gigo)
 std::vector <size_t> topoSort (const AdjVectorGraph &g)
 {
     struct OnEntry
@@ -170,58 +217,6 @@ std::vector <size_t> topoSort (const AdjVectorGraph &g)
 
     return onExit.answer;
 }
-
-
-
-void bfsDemo ()
-{
-    struct Say
-    {
-        void operator () (int vertex, int parent)
-        {
-            printf ("vertex %d, parent %d\n", vertex, parent);
-        }
-    };
-
-    struct GetMinDistance
-    {
-        std::vector <int> distances;
-
-        GetMinDistance (size_t n, size_t vertexFrom):
-            distances (n, -1)
-        {
-            distances[vertexFrom] = 0;
-        }
-
-        void operator () (int vertex, int parent)
-        {
-            distances [vertex] = distances [parent] + 1;
-        }
-    };
-
-    AdjVectorGraph g (8);
-    g.insertEdge (0, 1);
-    g.insertEdge (0, 2);
-    g.insertEdge (1, 3);
-    g.insertEdge (1, 4);
-    g.insertEdge (2, 5);
-    g.insertEdge (2, 6);
-
-    printf ("Vertexes in order they are visited from v = 0:\n");
-    Say say;
-    g.bfs <Say> (0, say);
-
-    printf ("Minimal distances from v = 0:\n");
-    GetMinDistance counter (8, 0);
-    g.bfs <GetMinDistance> (0, counter);
-
-    for (int i = 0; i < 8; ++i)
-    {
-        printf ("%d: %d\n", i, counter.distances[i]);
-    }
-
-}
-
 
 void dfsDemo ()
 {
