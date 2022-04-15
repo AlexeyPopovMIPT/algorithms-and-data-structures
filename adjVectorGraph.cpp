@@ -5,6 +5,7 @@
 #include <queue>
 #include <set>
 #include <stack>
+#include <functional>
 #include <cstdio>
 
 class AdjVectorGraph
@@ -38,7 +39,7 @@ public:
     }
 
     template <typename Func>
-    void bfs (int s, Func &func)
+    void bfs (int s, Func &func) const
     {
         std::vector <State> state (neibs.size(), UNVISITED);
         std::queue <int> queue;
@@ -67,7 +68,7 @@ public:
     }
 
     template <typename FuncEnter, typename FuncExit>
-    void dfs (size_t s, FuncEnter &funcEnter, FuncExit &funcExit)
+    void dfs (size_t s, FuncEnter &funcEnter, FuncExit &funcExit) const
     {
         const size_t MARK = (size_t)-1;
         std::stack <size_t> stk;
@@ -89,7 +90,9 @@ public:
 
             stk.pop ();
             stk.push (u);
+
             funcEnter (u);
+            
             for (auto v: neibs[u])
             {
                 if (state[v] == UNVISITED)
@@ -101,8 +104,15 @@ public:
         }
     }
 
+    inline size_t size () const
+    {
+        return neibs.size ();
+    }
+
 
 };
+
+
 
 void bfsDemo ()
 {
@@ -152,6 +162,8 @@ void bfsDemo ()
     }
 
 }
+
+
 void dfsDemo ()
 {
     struct EnterTime
@@ -192,6 +204,5 @@ void dfsDemo ()
 
 int main ()
 {
-    dfsDemo ();
 }
 
