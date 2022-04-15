@@ -12,15 +12,13 @@ class AdjVectorGraph
 {
     std::vector <std::set <int>> neibs;
 
-    enum State { UNVISITED, VISITED };
-
 public:
 
     explicit AdjVectorGraph (size_t count):
         neibs (count) 
     {}
 
-    bool insertEdge (size_t u, size_t v)
+    bool insert (size_t u, size_t v)
     {
         if (neibs[u].contains(v))
             return false;
@@ -29,7 +27,7 @@ public:
         return true;
     }
 
-    bool eraseEdge (size_t u, size_t v)
+    bool erase (size_t u, size_t v)
     {
         if (!neibs[u].contains(v))
             return false;
@@ -38,73 +36,9 @@ public:
         return true;
     }
 
-    template <typename Func>
-    void bfs (int s, Func &func) const
+    bool contains (size_t u, size_t v) const
     {
-        std::vector <State> state (neibs.size(), UNVISITED);
-        std::queue <int> queue;
-
-        state[s] = VISITED;
-        queue.push (s);
-
-        while (!queue.empty ())
-        {
-            int u = queue.front (); queue.pop ();
-
-            for (auto v: neibs [u])
-            {
-                if (state[v] == VISITED)
-                    continue;
-
-                func (v, u);
-
-                state [v] = VISITED;
-                queue.push (v);
-            }
-
-            state [u] = VISITED;
-        }
-
-    }
-
-    // funcEnter returns 1 if no further search required and vertex is to be closed immediately,
-    // returns 0 if further search is required
-    template <typename FuncEnter, typename FuncExit>
-    void dfs (size_t s, FuncEnter &funcEnter, FuncExit &funcExit) const
-    {
-        const size_t MARK = (size_t)-1;
-        std::stack <size_t> stk;
-        std::vector <State> state (neibs.size(), UNVISITED);
-
-        stk.push (MARK);
-        stk.push (s);
-
-        while (!stk.empty())
-        {
-            size_t u = stk.top (); stk.pop ();
-            state[u] = VISITED;
-
-            if (stk.empty () || stk.top () != MARK)
-            {
-                funcExit (u);
-                continue;
-            }
-
-            stk.pop ();
-            stk.push (u);
-
-            if (funcEnter (u))
-                continue;
-            
-            for (auto v: neibs[u])
-            {
-                if (state[v] == UNVISITED)
-                {
-                    stk.push (MARK);
-                    stk.push (v);
-                }
-            }
-        }
+        return neibs[u].contains(v);
     }
 
     inline size_t size () const
@@ -112,56 +46,85 @@ public:
         return neibs.size ();
     }
 
+    inline const std::set <int> &getNeibs (size_t u) const
+    {
+        return neibs[u];
+    }
 
 };
 
-void bfsDemo ()
+
+template <typename Func>
+void bfs (const AdjVectorGraph &g, int s, Func &func)
 {
-    struct Say
+    enum State { UNVISITED, VISITED };
+
+    std::vector <State> state (g.size(), UNVISITED);
+    std::queue <int> queue;
+
+    state[s] = VISITED;
+    queue.push (s);
+
+    while (!queue.empty ())
     {
-        void operator () (int vertex, int parent)
-        {
-            printf ("vertex %d, parent %d\n", vertex, parent);
-        }
-    };
+        int u = queue.front (); queue.pop ();
 
-    struct GetMinDistance
-    {
-        std::vector <int> distances;
-
-        GetMinDistance (size_t n, size_t vertexFrom):
-            distances (n, -1)
+        for (auto v: g.getNeibs(u))
         {
-            distances[vertexFrom] = 0;
+            if (state[v] == VISITED)
+                continue;
+
+            func (v, u);
+
+            state [v] = VISITED;
+            queue.push (v);
         }
 
-        void operator () (int vertex, int parent)
-        {
-            distances [vertex] = distances [parent] + 1;
-        }
-    };
-
-    AdjVectorGraph g (8);
-    g.insertEdge (0, 1);
-    g.insertEdge (0, 2);
-    g.insertEdge (1, 3);
-    g.insertEdge (1, 4);
-    g.insertEdge (2, 5);
-    g.insertEdge (2, 6);
-
-    printf ("Vertexes in order they are visited from v = 0:\n");
-    Say say;
-    g.bfs <Say> (0, say);
-
-    printf ("Minimal distances from v = 0:\n");
-    GetMinDistance counter (8, 0);
-    g.bfs <GetMinDistance> (0, counter);
-
-    for (int i = 0; i < 8; ++i)
-    {
-        printf ("%d: %d\n", i, counter.distances[i]);
+        state [u] = VISITED;
     }
 
+}
+
+// funcEnter returns 1 if no further search required and vertex is to be closed immediately,
+// returns 0 if further search is required
+template <typename FuncEnter, typename FuncExit>
+void dfs (const AdjVectorGraph &g, size_t s, FuncEnter &funcEnter, FuncExit &funcExit)
+{
+    enum State { UNVISITED, VISITED };
+    const size_t MARK = (size_t)-1;
+
+    std::stack <size_t> stk;
+    std::vector <State> state (g.size(), UNVISITED);
+
+    stk.push (MARK);
+    stk.push (s);
+
+    while (!stk.empty())
+    {
+        size_t u = stk.top (); stk.pop ();
+        state[u] = VISITED;
+
+        if (stk.empty () || stk.top () != MARK)
+        {
+            funcExit (u);
+            continue;
+        }
+
+        stk.pop ();
+        stk.push (u);
+
+        if (funcEnter (u))
+            continue;
+            
+        for (auto v: getNeibs[u])
+        {
+            if (state[v] == UNVISITED)
+            {
+                stk.push (MARK);
+                stk.push (v);
+            }
+        }
+    }
 }
 
 // topo sort of DAG g (if not acyclic, gigo)
@@ -212,10 +175,59 @@ std::vector <size_t> topoSort (const AdjVectorGraph &g)
     for (size_t vertex = 0; vertex < n; ++vertex)
     {
         if (onExit.answer [vertex] == (size_t)-1)
-            g.dfs (vertex, onEntry, onExit);
+            dfs (g, vertex, onEntry, onExit);
     }
 
     return onExit.answer;
+}
+
+void bfsDemo ()
+{
+    struct Say
+    {
+        void operator () (int vertex, int parent)
+        {
+            printf ("vertex %d, parent %d\n", vertex, parent);
+        }
+    };
+
+    struct GetMinDistance
+    {
+        std::vector <int> distances;
+
+        GetMinDistance (size_t n, size_t vertexFrom):
+            distances (n, -1)
+        {
+            distances[vertexFrom] = 0;
+        }
+
+        void operator () (int vertex, int parent)
+        {
+            distances [vertex] = distances [parent] + 1;
+        }
+    };
+
+    AdjVectorGraph g (8);
+    g.insert (0, 1);
+    g.insert (0, 2);
+    g.insert (1, 3);
+    g.insert (1, 4);
+    g.insert (2, 5);
+    g.insert (2, 6);
+
+    printf ("Vertexes in order they are visited from v = 0:\n");
+    Say say;
+    bfs <Say> (g, 0, say);
+
+    printf ("Minimal distances from v = 0:\n");
+    GetMinDistance counter (8, 0);
+    bfs <GetMinDistance> (g, 0, counter);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        printf ("%d: %d\n", i, counter.distances[i]);
+    }
+
 }
 
 void dfsDemo ()
@@ -242,31 +254,31 @@ void dfsDemo ()
     };
 
     AdjVectorGraph g (8);
-    g.insertEdge (0, 1);
-    g.insertEdge (0, 2);
-    g.insertEdge (1, 3);
-    g.insertEdge (1, 4);
-    g.insertEdge (2, 5);
-    g.insertEdge (2, 6);
+    g.insert (0, 1);
+    g.insert (0, 2);
+    g.insert (1, 3);
+    g.insert (1, 4);
+    g.insert (2, 5);
+    g.insert (2, 6);
 
     size_t time  = 0;
     EnterTime enterTime { &time };
     ExitTime exitTime { &time };
     
     printf ("Vertexes in order they are visited from v = 0:\n");
-    g.dfs (0, enterTime, exitTime);
+    dfs (g, 0, enterTime, exitTime);
 }
 
 void topoSortDemo ()
 {
     AdjVectorGraph g (5);
-    g.insertEdge (0, 1);
-    g.insertEdge (1, 2);
-    g.insertEdge (2, 3);
-    g.insertEdge (3, 4);
-    g.insertEdge (0, 2);
-    g.insertEdge (0, 3);
-    g.insertEdge (2, 4);
+    g.insert (0, 1);
+    g.insert (1, 2);
+    g.insert (2, 3);
+    g.insert (3, 4);
+    g.insert (0, 2);
+    g.insert (0, 3);
+    g.insert (2, 4);
 
     std::vector <size_t> sorted = topoSort (g);
 
