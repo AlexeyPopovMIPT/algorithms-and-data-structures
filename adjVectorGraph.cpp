@@ -7,13 +7,13 @@
 #include <stack>
 #include <cstdio>
 
-class AdjVectorGraph
+class UnweightedGraph
 {
     std::vector <std::set <int>> neibs;
 
 public:
 
-    explicit AdjVectorGraph (size_t count):
+    explicit UnweightedGraph (size_t count):
         neibs (count) 
     {}
 
@@ -54,7 +54,7 @@ public:
 
 
 template <typename Func>
-void bfs (const AdjVectorGraph &g, int s, Func &func)
+void bfs (const UnweightedGraph &g, int s, Func &func)
 {
     enum State { UNVISITED, VISITED };
 
@@ -87,7 +87,7 @@ void bfs (const AdjVectorGraph &g, int s, Func &func)
 // funcEnter returns 1 if no further search required and vertex is to be closed immediately,
 // returns 0 if further search is required
 template <typename FuncEnter, typename FuncExit>
-void dfs (const AdjVectorGraph &g, size_t s, FuncEnter &funcEnter, FuncExit &funcExit)
+void dfs (const UnweightedGraph &g, size_t s, FuncEnter &funcEnter, FuncExit &funcExit)
 {
     enum State { UNVISITED, VISITED };
     const size_t MARK = (size_t)-1;
@@ -127,7 +127,7 @@ void dfs (const AdjVectorGraph &g, size_t s, FuncEnter &funcEnter, FuncExit &fun
 }
 
 // topo sort of DAG g (if not acyclic, gigo)
-std::vector <size_t> topoSort (const AdjVectorGraph &g)
+std::vector <size_t> topoSort (const UnweightedGraph &g)
 {
     struct OnEntry
     {
@@ -206,7 +206,7 @@ void bfsDemo ()
         }
     };
 
-    AdjVectorGraph g (8);
+    UnweightedGraph g (8);
     g.insert (0, 1);
     g.insert (0, 2);
     g.insert (1, 3);
@@ -252,7 +252,7 @@ void dfsDemo ()
         }
     };
 
-    AdjVectorGraph g (8);
+    UnweightedGraph g (8);
     g.insert (0, 1);
     g.insert (0, 2);
     g.insert (1, 3);
@@ -270,7 +270,7 @@ void dfsDemo ()
 
 void topoSortDemo ()
 {
-    AdjVectorGraph g (5);
+    UnweightedGraph g (5);
     g.insert (0, 1);
     g.insert (1, 2);
     g.insert (2, 3);
