@@ -8,7 +8,7 @@
 #include <cassert>
 
 template <typename WeightT>
-class AdjVectorWeightedGraph
+class WeightedGraph
 {
     std::vector <std::map <size_t, WeightT>> neibs;
 
@@ -17,7 +17,7 @@ public:
     struct WeightedEdge;
     struct UnweightedEdge;
 
-    explicit AdjVectorWeightedGraph (size_t count):
+    explicit WeightedGraph (size_t count):
         neibs (count) 
     {}
 
@@ -70,7 +70,7 @@ public:
 };
 
 template <typename WeightT>
-struct AdjVectorWeightedGraph<WeightT>::WeightedEdge
+struct WeightedGraph<WeightT>::WeightedEdge
 {
     size_t u, v;
     WeightT weight;
@@ -81,7 +81,7 @@ struct AdjVectorWeightedGraph<WeightT>::WeightedEdge
     }
 };
 template <typename WeightT>
-struct AdjVectorWeightedGraph<WeightT>::UnweightedEdge
+struct WeightedGraph<WeightT>::UnweightedEdge
 {
     size_t u, v;
 };

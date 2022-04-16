@@ -4,9 +4,9 @@
 
 // Prime algo
 template <typename WeightT>
-AdjVectorWeightedGraph<WeightT> getMST (const AdjVectorWeightedGraph<WeightT>& g)
+WeightedGraph<WeightT> getMST (const WeightedGraph<WeightT>& g)
 {
-    using edge_t = AdjVectorWeightedGraph<WeightT>::WeightedEdge;
+    using edge_t = WeightedGraph<WeightT>::WeightedEdge;
 
     struct oq_compare
     {
@@ -18,7 +18,7 @@ AdjVectorWeightedGraph<WeightT> getMST (const AdjVectorWeightedGraph<WeightT>& g
 
     std::priority_queue <edge_t, std::vector<edge_t>, oq_compare> qu;
 
-    AdjVectorWeightedGraph<WeightT> mst (g.size ());
+    WeightedGraph<WeightT> mst (g.size ());
     
     // Выбираем произвольную вершину (нулевую) и кладём в очередь все инцидентные ей рёбра
     {
@@ -86,7 +86,7 @@ AdjVectorWeightedGraph<WeightT> getMST (const AdjVectorWeightedGraph<WeightT>& g
 
 int main ()
 { 
-    AdjVectorWeightedGraph<int> g (8);
+    WeightedGraph<int> g (8);
     g.insert (0, 2, 7);
     g.insert (0, 1, 10);
     g.insert (0, 5, 26);
